@@ -1,0 +1,17 @@
+Fecha de atencion: 0/0/101
+Cedula: 
+Nombre: 
+Apellido:Cedula: 
+Fecha de atencion: 0/0/101
+Cedula: 
+Nombre: 	Apellido:	Cedula: 
+Cedula: 
+Nombre: 	Apellido:	Cedula: 
+Cedula: 
+Nombre: 	Apellido:	Cedula: 
+Cedula: 
+Nombre: 	Apellido:	Cedula: 
+Fecha de nacimiento: -1510271936/32758/-1027606192
+Cedula: 1234567890
+Nombre: fran	Apellido:Laines	Cedula: 1234567890
+Fecha de nacimiento: 12/3/2024
