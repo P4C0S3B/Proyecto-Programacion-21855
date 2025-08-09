@@ -11,12 +11,29 @@ struct paciente{
     char sexo;
     
 };
+void crearArchivoPaciente(paciente &p){
+    cin.ignore();
+    do {
+        cout << "Ingrese la cedula del paciente: ";
+        getline(cin, p.cedula);
+        if (p.cedula.empty()) {
+            cout << "El campo de cédula no puede estar vacío. Por favor ingrese una cedula válida." << endl;
+        }
+    } while (p.cedula.empty());
+    string nombreA = p.cedula + ".txt";
+    ofstream archivo(nombreA, ios:: out); //ios::out crea el archivo en cuestion
+    if (!archivo) {
+        cout << "Error al crear el archivo: " << nombreA << endl;
+        return;
+    }
+    cout<< "El archivo para el paciente con cedula " << p.cedula << " ha sido creado exitosamente."<< endl;
+}
 void registrarPaciente(paciente &nuevoPaciente) {
     
     cout << "Ingrese la fecha de atencion (dd mm aaaa): " << endl;;
     cout << "Dia: ";    cin >> nuevoPaciente.dia1;
     cout << "Mes: "; cin >> nuevoPaciente.mes1;
-    cout << "Año: "; cin >> nuevoPaciente.anio1;
+    cout << "Anio: "; cin >> nuevoPaciente.anio1;
     cout << "Ingrese el nombre del paciente: ";
     cin >> nuevoPaciente.nombre;
     cout << "Ingrese el apellido del paciente: ";
@@ -26,37 +43,25 @@ void registrarPaciente(paciente &nuevoPaciente) {
     cin >> nuevoPaciente.dia2;
     cout << "Mes: ";
     cin >> nuevoPaciente.mes2;
-    cout << "Año: ";
+    cout << "Anioo: ";
     cin >> nuevoPaciente.anio2;
-    cout << "Ingrese la cedula del paciente: ";
-    cin >> nuevoPaciente.cedula;
     cout << "Ingresa el sexo del paciente (M/F): ";
     cin >> nuevoPaciente.sexo;
 
     cout << "Paciente registrado con exito!" << endl;
 
 }
-void crearArchivoPaciente(paciente p){
-    
-    do{
-        cout << "Ingrese la cedula del paciente; ";
-        getline(cin, p.cedula);
-        if(p.cedula.empty()){
-            cout << "El campo de cedula no puede estar vacio. Por favor ingrese una cedula valida." << endl;
-        }
-    }while(p.cedula.empty());
+
+void imprimirArchivo(paciente &p){
     string nombreA = p.cedula + ".txt";
-    ofstream archivo(nombreA, ios:: out); //ios::out crea el archivo en cuestion
-}
-void imprimirArchivo(paciente p){
-    ofstream archivo("pacientes.txt", ios::app);
+    ofstream archivo(nombreA, ios:: app);
     if(!archivo){
         cout << "Error al abrir el archivo." << endl;
         return;
     }
-    archivo << "Fecha de atencion: " << p.dia1 << "/" << p.mes1 << "/" << p.anio1 << endl;
+    archivo << "Fecha de atención: " << p.dia1 << "/" << p.mes1 << "/" << p.anio1 << endl;
     archivo << "Cedula: " << p.cedula << endl;
-    archivo << "Nombre: " << p.nombre << '\t' << "Apellido:" << p.apellido << "\t" << "Cedula: " << p.cedula << endl;
+    archivo << "Nombre: " << p.nombre << '\t' << "Apellido:" << p.apellido << "\t" << "Cédula: " << p.cedula << endl;
     archivo << "Fecha de nacimiento: " << p.dia2 << "/" << p.mes2 << "/" << p.anio2 << endl;
     archivo.close();
 
@@ -80,6 +85,7 @@ int main(){
     {
     case 1:
         crearArchivoPaciente(pac);
+        registrarPaciente(pac);
         imprimirArchivo(pac);
         break;
     
