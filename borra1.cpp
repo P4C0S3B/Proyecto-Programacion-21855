@@ -11,19 +11,25 @@ struct paciente{
     char sexo;
     
 };
-void crearArchivoPaciente(paciente &p){
+string nombreArchivo(const paciente &p){
+    string nombreArc = p.cedula + ".txt";
+    return nombreArc;
+}//a libereria
+void pedirCedula(paciente &p){
     cin.ignore();
-    do {
+      do {
         cout << "Ingrese la cedula del paciente: ";
         getline(cin, p.cedula);
         if (p.cedula.empty()) {
             cout << "El campo de cédula no puede estar vacío. Por favor ingrese una cedula válida." << endl;
         }
     } while (p.cedula.empty());
-    string nombreA = p.cedula + ".txt";
-    ofstream archivo(nombreA, ios:: out); //ios::out crea el archivo en cuestion
+}// a libreria
+void crearArchivoPaciente(paciente &p){
+    cin.ignore();
+    ofstream archivo(nombreArchivo(p), ios::out);
     if (!archivo) {
-        cout << "Error al crear el archivo: " << nombreA << endl;
+        cout << "Error al crear el archivo: " << nombreArchivo << endl;
         return;
     }
     cout<< "El archivo para el paciente con cedula " << p.cedula << " ha sido creado exitosamente."<< endl;
@@ -53,15 +59,14 @@ void registrarPaciente(paciente &nuevoPaciente) {
 }
 
 void imprimirArchivo(paciente &p){
-    string nombreA = p.cedula + ".txt";
-    ofstream archivo(nombreA, ios:: app);
+    ofstream archivo(nombreArchivo(p), ios:: app);
     if(!archivo){
         cout << "Error al abrir el archivo." << endl;
         return;
     }
     archivo << "Fecha de atención: " << p.dia1 << "/" << p.mes1 << "/" << p.anio1 << endl;
-    archivo << "Cedula: " << p.cedula << endl;
-    archivo << "Nombre: " << p.nombre << '\t' << "Apellido:" << p.apellido << "\t" << "Cédula: " << p.cedula << endl;
+    archivo << "Cédula: " << p.cedula << endl;
+    archivo << "Nombre: " << p.nombre << '\t' << "Apellido:" << p.apellido << endl;
     archivo << "Fecha de nacimiento: " << p.dia2 << "/" << p.mes2 << "/" << p.anio2 << endl;
     archivo.close();
 
@@ -84,6 +89,7 @@ int main(){
     switch (op)
     {
     case 1:
+        pedirCedula(pac);
         crearArchivoPaciente(pac);
         registrarPaciente(pac);
         imprimirArchivo(pac);
