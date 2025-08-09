@@ -129,16 +129,18 @@ void registrarPaciente(paciente &nuevoPaciente)
     cin >> nuevoPaciente.mes1;
     cout << "Anio: ";
     cin >> nuevoPaciente.anio1;
+    cin.ignore();
     cout << "Ingrese el nombre del paciente: ";
-    cin >> nuevoPaciente.nombre;
+    getline(cin, nuevoPaciente.nombre);
     cout << "Ingrese el apellido del paciente: ";
-    cin >> nuevoPaciente.apellido;
+    getline(cin, nuevoPaciente.apellido);
+    cin.ignore();
     cout << "Ingrese la fecha de nacimiento del paciente (dd mm aaaa): " << endl;
     cout << "Dia: ";
     cin >> nuevoPaciente.dia2;
     cout << "Mes: ";
     cin >> nuevoPaciente.mes2;
-    cout << "Anioo: ";
+    cout << "Anio: ";
     cin >> nuevoPaciente.anio2;
     do
     {
@@ -159,11 +161,13 @@ void imprimirArchivo(paciente &p)
     }
     archivo << "Fecha de atención: " << p.dia1 << "/" << p.mes1 << "/" << p.anio1 << endl;
     archivo << "Cédula: " << p.cedula << endl;
-    archivo << "Nombre: " << p.nombre << '\t' << "Apellido:" << p.apellido << endl;
+    archivo << "Nombres: " << p.nombre << '\t' << "Apellidos:" << p.apellido << endl;
     archivo << "Fecha de nacimiento: " << p.dia2 << "/" << p.mes2 << "/" << p.anio2 << endl;
     archivo.close();
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 int main()
 {
     paciente pac;
@@ -177,8 +181,9 @@ int main()
         cout << "Por favor ingrese una opcion" << endl;
         cout << "1.- Registro de un paciente nuevo." << endl;
         cout << "2.- Consulta de informacion del paciente (Por numero de cedula)." << endl;
-        cout << "3.- Agregar informacion del paciente." << endl;
-        cout << "4.- Salir" << endl;
+        cout << "3.- Agregar informacion de un paciente." << endl;
+        cout << "4.- Modificar informacion de un paciente." << endl;
+        cout << "5.- Salir" << endl;
         do
         {
             cout << "Por favor, ingrese una de las opciones mostradas (1 - 4)" << endl;
@@ -200,6 +205,9 @@ int main()
         case 3:
             break;
         case 4:
+            break;
+        case 5:
+            cout << "Saliendo..." << endl;
             break;
         default:
             break;
