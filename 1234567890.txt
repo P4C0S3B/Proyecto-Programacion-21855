@@ -1,4 +1,0 @@
-Fecha de atención: 2/2/2
-Cedula: 1234567890
-Nombre: 2	Apellido:2	Cédula: 1234567890
-Fecha de nacimiento: 2/2/2
