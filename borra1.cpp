@@ -13,12 +13,15 @@ struct paciente{
 };
 void registrarPaciente(paciente &nuevoPaciente) {
     
-
+    cout << "Ingrese la fecha de atencion (dd mm aaaa): " << endl;;
+    cout << "Dia: ";    cin >> nuevoPaciente.dia1;
+    cout << "Mes: "; cin >> nuevoPaciente.mes1;
+    cout << "Año: "; cin >> nuevoPaciente.anio1;
     cout << "Ingrese el nombre del paciente: ";
     cin >> nuevoPaciente.nombre;
     cout << "Ingrese el apellido del paciente: ";
     cin >> nuevoPaciente.apellido;
-    cout << "Ingrese la fecha de nacimiento del paciente (dd mm aaaa): ";
+    cout << "Ingrese la fecha de nacimiento del paciente (dd mm aaaa): " << endl;;
     cout << "Dia: ";
     cin >> nuevoPaciente.dia2;
     cout << "Mes: ";
@@ -33,13 +36,25 @@ void registrarPaciente(paciente &nuevoPaciente) {
     cout << "Paciente registrado con exito!" << endl;
 
 }
+void crearArchivoPaciente(paciente p){
+    
+    do{
+        cout << "Ingrese la cedula del paciente; ";
+        getline(cin, p.cedula);
+        if(p.cedula.empty()){
+            cout << "El campo de cedula no puede estar vacio. Por favor ingrese una cedula valida." << endl;
+        }
+    }while(p.cedula.empty());
+    string nombreA = p.cedula + ".txt";
+    ofstream archivo(nombreA, ios:: out); //ios::out crea el archivo en cuestion
+}
 void imprimirArchivo(paciente p){
     ofstream archivo("pacientes.txt", ios::app);
     if(!archivo){
         cout << "Error al abrir el archivo." << endl;
         return;
     }
-    //archivo << "Fecha de atencion: " << p.dia1 << "/" << p.mes1 << "/" << p.anio1 << endl;
+    archivo << "Fecha de atencion: " << p.dia1 << "/" << p.mes1 << "/" << p.anio1 << endl;
     archivo << "Cedula: " << p.cedula << endl;
     archivo << "Nombre: " << p.nombre << '\t' << "Apellido:" << p.apellido << "\t" << "Cedula: " << p.cedula << endl;
     archivo << "Fecha de nacimiento: " << p.dia2 << "/" << p.mes2 << "/" << p.anio2 << endl;
@@ -64,7 +79,7 @@ int main(){
     switch (op)
     {
     case 1:
-        registrarPaciente(pac);
+        crearArchivoPaciente(pac);
         imprimirArchivo(pac);
         break;
     
