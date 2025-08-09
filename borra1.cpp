@@ -16,25 +16,31 @@ string nombreArchivo(const paciente &p)
     string nombreArc = p.cedula + ".txt";
     return nombreArc;
 } // a libereria
-int moduloDiez(paciente p){
-    int suma=0;
-    for(int i=0; i<9;i++){
-        int digito = p.cedula[i]-'0';// en la tabla ASCII, los numeros del 0 al 9 son consecutivos, al restar el '0', restamos el valor ASCII de 0 al valor ASCII del numero en cuestion, obteniendo el valor entero
-        if(i%2==0){
-            digito*=2;
-            if(digito > 9){
+////////////////////////////////////////////////////////////////////////////////////////////////////
+int moduloDiez(paciente p)
+{
+    int suma = 0;
+    for (int i = 0; i < 9; i++)
+    {
+        int digito = p.cedula[i] - '0'; // en la tabla ASCII, los numeros del 0 al 9 son consecutivos, al restar el '0', restamos el valor ASCII de 0 al valor ASCII del numero en cuestion, obteniendo el valor entero
+        if (i % 2 == 0)
+        {
+            digito *= 2;
+            if (digito > 9)
+            {
                 digito -= 9;
             }
         }
         suma += digito;
     }
     int digitoVerificador = 10 - (suma % 10);
-    if(digitoVerificador == 10){
+    if (digitoVerificador == 10)
+    {
         digitoVerificador = 0;
     }
     return digitoVerificador;
 } // a libreria
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 void pedirCedula(paciente &p)
 {
     bool cedulaValida;
@@ -67,8 +73,9 @@ void pedirCedula(paciente &p)
                 break;
             }
         }
-        int tercerDigito = p.cedula[2]-'0';
-        if (tercerDigito > 6 ){
+        int tercerDigito = p.cedula[2] - '0';
+        if (tercerDigito > 6)
+        {
             cout << "Cedula no valida (tercer digito invalido). Por favor ingrese una cedula valida." << endl;
             cedulaValida = false;
             continue;
@@ -83,28 +90,34 @@ void pedirCedula(paciente &p)
                 continue;
             }
         }
-        if(moduloDiez(p)!= (p.cedula[9]- '0')){
+        if (moduloDiez(p) != (p.cedula[9] - '0'))
+        {
             cout << "La cedula ingresada no es valida. Por favor ingrese una cedula valida." << endl;
             cedulaValida = false;
             continue;
         }
     } while (cedulaValida == false);
 } // a libreria
-
-void crearArchivoPaciente(paciente &p)
+////////////////////////////////////////////////////////////////////////////////////////////////////
+bool crearArchivoPaciente(paciente &p)
 {
-    cin.ignore();
+    ifstream archivoE(nombreArchivo(p));
+    if (archivoE)
+    {
+        cout << "El registro para este paciente ya existe." << endl;
+        archivoE.close();
+        return false;
+    }
     ofstream archivo(nombreArchivo(p), ios::out);
     if (!archivo)
     {
-        cout << "Error al crear el archivo: " << nombreArchivo << endl;
-        return;
+        cout << "Error al crear el registro: " << nombreArchivo << endl;
+        return false;
     }
-    if(nombreArchivo){
-        cout << "El archivo ya existe." << endl;
-    }
-    cout << "El archivo para el paciente con cedula " << p.cedula << " ha sido creado exitosamente." << endl;
+    cout << "El registro para el paciente con cedula " << p.cedula << " ha sido creado exitosamente." << endl;
+    return true;
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////////
 void registrarPaciente(paciente &nuevoPaciente)
 {
 
@@ -121,19 +134,21 @@ void registrarPaciente(paciente &nuevoPaciente)
     cout << "Ingrese el apellido del paciente: ";
     cin >> nuevoPaciente.apellido;
     cout << "Ingrese la fecha de nacimiento del paciente (dd mm aaaa): " << endl;
-    ;
     cout << "Dia: ";
     cin >> nuevoPaciente.dia2;
     cout << "Mes: ";
     cin >> nuevoPaciente.mes2;
     cout << "Anioo: ";
     cin >> nuevoPaciente.anio2;
-    cout << "Ingresa el sexo del paciente (M/F): ";
-    cin >> nuevoPaciente.sexo;
+    do
+    {
+        cout << "Ingresa el sexo del paciente (M/F): ";
+        cin >> nuevoPaciente.sexo;
+    } while (nuevoPaciente.sexo != 'M' && nuevoPaciente.sexo != 'F');
 
     cout << "Paciente registrado con exito!" << endl;
 }
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 void imprimirArchivo(paciente &p)
 {
     ofstream archivo(nombreArchivo(p), ios::app);
@@ -148,34 +163,47 @@ void imprimirArchivo(paciente &p)
     archivo << "Fecha de nacimiento: " << p.dia2 << "/" << p.mes2 << "/" << p.anio2 << endl;
     archivo.close();
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////////
 int main()
 {
     paciente pac;
     int op;
-    cout << "==========================" << endl;
-    cout << "REGISTRO DE CITAS MEDICAS" << endl;
-    cout << "==========================" << endl;
-    cout << "Ingrese una opcion" << endl;
-    cout << "1.- Registro de un paciente nuevo." << endl;
-    cout << "2.- Consulta de informacion del paciente (Por numero de cedula)" << endl;
-    cout << "3.- Agregar informacion del paciente" << endl;
-    cout << "4.- Salir" << endl;
+    cout << "============================" << endl;
+    cout << "REGISTRO DE HISTORIAL MEDICO" << endl;
+    cout << "============================" << endl;
+    cout << "Bienvenido al sistema de registro de pacientes." << endl;
     do
     {
-        cout << "Por favor, ingrese una de las opciones mostradas (1 - 4)" << endl;
-        cin >> op;
-    } while (op < 1 || op > 4);
-    switch (op)
-    {
-    case 1:
-        pedirCedula(pac);
-        crearArchivoPaciente(pac);
-        registrarPaciente(pac);
-        imprimirArchivo(pac);
-        break;
+        cout << "Por favor ingrese una opcion" << endl;
+        cout << "1.- Registro de un paciente nuevo." << endl;
+        cout << "2.- Consulta de informacion del paciente (Por numero de cedula)." << endl;
+        cout << "3.- Agregar informacion del paciente." << endl;
+        cout << "4.- Salir" << endl;
+        do
+        {
+            cout << "Por favor, ingrese una de las opciones mostradas (1 - 4)" << endl;
+            cin >> op;
+        } while (op < 1 || op > 4);
 
-    default:
-        break;
-    }
+        switch (op)
+        {
+        case 1:
+            pedirCedula(pac);
+            if (crearArchivoPaciente(pac))
+            {
+                registrarPaciente(pac);
+                imprimirArchivo(pac);
+            }
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        default:
+            break;
+        }
+    } while (op != 4);
     return 0;
 }
