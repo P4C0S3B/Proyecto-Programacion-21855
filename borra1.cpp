@@ -168,6 +168,7 @@ bool archivoExistente(paciente p)
 { // funcion encargada de buscar el archivo en funcion del numero de cedula
     string nombreAr = p.cedula + ".txt";
     ifstream archivo(nombreAr);
+    archivo.close();
     return archivo.good();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -183,22 +184,33 @@ void busquedaFecha(paciente p, registro r)
     cin >> mes;
     cout << "Anio: ";
     cin >> anio;
-    string nombreArc = nombreArchivo(p) + ".txt";
-    ifstream archivo(nombreArc);
+    string fechaBusqueda = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
+    cout << "Buscando citas para la fecha: " << fechaBusqueda << endl;
+    ifstream archivo(nombreArchivo(p));
     bool encontrado = false;
-    registro reg;
-    while (archivo >> reg.especialidad >> reg.doctor)
+    if (!archivo)
     {
-        archivo.ignore();
-        getline(archivo, reg.especialidad);
-        getline(archivo, reg.doctor);
-        if (reg.dia == dia && reg.mes == mes && reg.anio == anio)
+        cout << "Error al abrir el archivo." << endl;
+        return;
+    }
+    else
+    {
+        string linea;
+        while (getline(archivo, linea))
         {
-            encontrado = true;
-            cout << "Fecha de atencion: " << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
-            cout << "Especialidad: " << reg.especialidad << endl;
-            cout << "Doctor: " << reg.doctor << endl;
+            if (linea.find(fechaBusqueda) != string::npos){
+                encontrado = true;
+                cout << linea << endl;
+                while(getline(archivo, linea) && linea != "_________________________________________"){
+                    cout << linea << endl;
+                }
+                cout <<  "_________________________________________" << endl;
+            }
         }
+        if(!encontrado){
+            cout << "No se encontraron registros para esta fecha." << endl;
+        }
+        archivo.close();
     }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -250,6 +262,8 @@ void registroInfo(paciente &pac, registro &reg)
         archivo << "Fecha de cita: " << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
         archivo << "Especialidad: " << reg.especialidad << endl;
         archivo << "Doctor: " << reg.doctor << endl;
+        archivo.close();
+        cout << "Informacion registrada exitosamente." << endl;
     }
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -325,6 +339,7 @@ int main()
                 switch (metodo)
                 {
                 case 1:
+                    busquedaFecha(pac, reg);
                     break;
                 case 2:
                     seleccionarEspecialidad();

@@ -6,3 +6,7 @@ _________________________________________
 Fecha de cita: 10/8/2025
 Especialidad: Neurologia
 Doctor: Edgar Ormaza
+_________________________________________
+Fecha de cita: 10/8/2025
+Especialidad: Medicina General
+Doctor: Byron Caicedo
