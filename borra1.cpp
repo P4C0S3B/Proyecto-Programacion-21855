@@ -7,17 +7,30 @@ struct paciente
     string cedula;
     string nombre;
     string apellido;
+    string especialidad;
+    string telefono;
+    string direccion;
     int dia1, mes1, anio1, edad;
     int dia2, mes2, anio2;
     char sexo;
 };
-string nombreArchivo(const paciente &p)
+
+struct registro
+{
+    string especialidad;
+    string doctor;
+    int dia, mes, anio;
+};
+string especialidadLista[10] = {"Cardiologia", "Traumatologia", "Neurologia", "Medicina familiar",
+                                "Endocrinologia", "Medicina General", "Urologia", "Nutricion",
+                                "Ginecologia", "Pediatria"};
+string nombreArchivo(const paciente &p) // sub - funcion especifica para nombrar un archivo con la cedula
 {
     string nombreArc = p.cedula + ".txt";
     return nombreArc;
 } // a libereria
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-int moduloDiez(paciente p)
+int moduloDiez(paciente p) // funcion necesaria para validar los numeros de cedula
 {
     int suma = 0;
     for (int i = 0; i < 9; i++)
@@ -41,7 +54,7 @@ int moduloDiez(paciente p)
     return digitoVerificador;
 } // a libreria
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-void pedirCedula(paciente &p)
+void pedirCedula(paciente &p) // funcion principal encargada de, ademas de pedir cedula, valida su tamaño, caracteres, etc
 {
     bool cedulaValida;
     cin.ignore();
@@ -99,7 +112,7 @@ void pedirCedula(paciente &p)
     } while (cedulaValida == false);
 } // a libreria
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-bool crearArchivoPaciente(paciente &p)
+bool crearArchivoPaciente(paciente &p) // funcion encargada de crear el archivo con el numero de cedula
 {
     ifstream archivoE(nombreArchivo(p));
     if (archivoE)
@@ -118,7 +131,7 @@ bool crearArchivoPaciente(paciente &p)
     return true;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-void registrarPaciente(paciente &nuevoPaciente)
+void registrarPaciente(paciente &nuevoPaciente) // funcion encargada de registrar la infromacion fija del paciente, que no varia entre citas
 {
 
     cout << "Ingrese la fecha de atencion (dd mm aaaa): " << endl;
@@ -151,6 +164,95 @@ void registrarPaciente(paciente &nuevoPaciente)
     cout << "Paciente registrado con exito!" << endl;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+bool archivoExistente(paciente p)
+{ // funcion encargada de buscar el archivo en funcion del numero de cedula
+    string nombreAr = p.cedula + ".txt";
+    ifstream archivo(nombreAr);
+    return archivo.good();
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+void busquedaFecha(paciente p, registro r)
+{
+    int dia, mes, anio;
+    cout << "Ingrese la feccha que desea buscar: " << endl;
+    cout << "Dia: ";
+    cin >> dia;
+    cout << "Mes: ";
+    cin >> mes;
+    cout << "Anio: ";
+    cin >> anio;
+    string nombreArc = nombreArchivo(p) + ".txt";
+    ifstream archivo(nombreArc);
+    bool encontrado = false;
+    registro reg;
+    while (archivo >> reg.especialidad >> reg.doctor)
+    {
+        archivo.ignore();
+        getline(archivo, reg.especialidad);
+        getline(archivo, reg.doctor);
+        if (reg.dia == dia && reg.mes == mes && reg.anio == anio)
+        {
+            encontrado = true;
+            cout << "Fecha de atencion: " << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
+            cout << "Especialidad: " << reg.especialidad << endl;
+            cout << "Doctor: " << reg.doctor << endl;
+        }
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
+void busquedaEspecialidad(paciente pac)
+{
+    string especialidad;
+    string nombreArc = nombreArchivo(pac) + ".txt";
+    ifstream archivo(nombreArc);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
+int seleccionarEspecialidad()
+{
+    int opcion;
+    do
+    {
+        cout << "Seleccione una especialidad: " << endl;
+        for (int i = 0; i < 10; i++)
+        {
+            cout << i + 1 << ".- " << especialidadLista[i] << endl;
+        }
+        cin >> opcion;
+    } while (opcion < 1 || opcion > 10);
+    return opcion;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+void registroInfo(paciente &pac, registro &reg)
+{
+    if (!archivoExistente(pac))
+    {
+        cout << "No se encontro ningun registro con esta cedula." << endl;
+    }
+    else
+    {
+        cout << "Registro encontrado." << endl;
+        cout << "Ingrese la fecha de la consulta: " << endl;
+        cout << "Dia: ";
+        cin >> reg.dia;
+        cout << "Mes: ";
+        cin >> reg.mes;
+        cout << "Anio: ";
+        cin >> reg.anio;
+        cout << "Ingrese la especialidad de la cita: ";
+        reg.especialidad = especialidadLista[seleccionarEspecialidad() - 1];
+        cin.ignore();
+        cout << "Ingrese el nombre del doctor a cargo de la cita: ";
+        getline(cin, reg.doctor);
+        ofstream archivo(nombreArchivo(pac), ios::app);
+        archivo << "_________________________________________" << endl;
+        archivo << "Fecha de cita: " << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
+        archivo << "Especialidad: " << reg.especialidad << endl;
+        archivo << "Doctor: " << reg.doctor << endl;
+    }
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
 void imprimirArchivo(paciente &p)
 {
     ofstream archivo(nombreArchivo(p), ios::app);
@@ -166,11 +268,10 @@ void imprimirArchivo(paciente &p)
     archivo.close();
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
 int main()
 {
     paciente pac;
+    registro reg;
     int op;
     cout << "============================" << endl;
     cout << "REGISTRO DE HISTORIAL MEDICO" << endl;
@@ -180,15 +281,15 @@ int main()
     {
         cout << "Por favor ingrese una opcion" << endl;
         cout << "1.- Registro de un paciente nuevo." << endl;
-        cout << "2.- Consulta de informacion del paciente (Por numero de cedula)." << endl;
-        cout << "3.- Agregar informacion de un paciente." << endl;
+        cout << "2.- Agregar informacion de un paciente." << endl;
+        cout << "3.- Consulta de informacion del paciente (Por numero de cedula)." << endl;
         cout << "4.- Modificar informacion de un paciente." << endl;
         cout << "5.- Salir" << endl;
         do
         {
-            cout << "Por favor, ingrese una de las opciones mostradas (1 - 4)" << endl;
+            cout << "Por favor, ingrese una de las opciones mostradas (1 - 5)" << endl;
             cin >> op;
-        } while (op < 1 || op > 4);
+        } while (op < 1 || op > 5);
 
         switch (op)
         {
@@ -201,8 +302,35 @@ int main()
             }
             break;
         case 2:
+            pedirCedula(pac);
+            registroInfo(pac, reg);
             break;
         case 3:
+            int metodo;
+            pedirCedula(pac);
+            if (!archivoExistente(pac))
+            {
+                cout << "No se encontro ningun registro con esta cedula." << endl;
+            }
+            else
+            {
+                cout << "Registro encontrado." << endl;
+                do
+                {
+                    cout << "Ingrese el metodo por el que buscara la informacion del paciente." << endl;
+                    cout << "1.- Fecha de atencion." << endl;
+                    cout << "2.- Especialidad." << endl;
+                    cin >> metodo;
+                } while (metodo != 1 && metodo != 2);
+                switch (metodo)
+                {
+                case 1:
+                    break;
+                case 2:
+                    seleccionarEspecialidad();
+                    break;
+                }
+            }
             break;
         case 4:
             break;
@@ -212,6 +340,6 @@ int main()
         default:
             break;
         }
-    } while (op != 4);
+    } while (op != 5);
     return 0;
 }
