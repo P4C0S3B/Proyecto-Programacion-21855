@@ -1,6 +1,9 @@
 #include <iostream>
 #include <cstring>
 #include <fstream>
+#include <regex>
+#include <chrono>
+#include <ctime>
 using namespace std;
 struct paciente
 {
@@ -15,8 +18,7 @@ struct paciente
     char sexo;
 };
 
-struct registro
-{
+struct registro{
     string especialidad;
     string doctor;
     int dia, mes, anio;
@@ -129,34 +131,105 @@ bool crearArchivoPaciente(const paciente &p) // funcion encargada de crear el ar
     return true;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-void registrarPaciente(paciente &nuevoPaciente) // funcion encargada de registrar la infromacion fija del paciente, que no varia entre citas
-{
-
-    cout << "Ingrese la fecha de atencion (dd mm aaaa): " << endl;
-    ;
-    cout << "Dia: ";
-    cin >> nuevoPaciente.dia1;
-    cout << "Mes: ";
-    cin >> nuevoPaciente.mes1;
-    cout << "Anio: ";
-    cin >> nuevoPaciente.anio1;
-    cin.ignore();
-    cout << "Ingrese el nombre del paciente: ";
-    getline(cin, nuevoPaciente.nombre);
-    cout << "Ingrese el apellido del paciente: ";
-    getline(cin, nuevoPaciente.apellido);
-    cin.ignore();
-    cout << "Ingrese la fecha de nacimiento del paciente (dd mm aaaa): " << endl;
-    cout << "Dia: ";
-    cin >> nuevoPaciente.dia2;
-    cout << "Mes: ";
-    cin >> nuevoPaciente.mes2;
-    cout << "Anio: ";
-    cin >> nuevoPaciente.anio2;
-    do
-    {
+bool validarNombre(string nombre){
+    if (nombre.empty()) {
+        return false;
+    }
+    regex patron("^[A-Za-zÁÉÍÓÚáéíóúÑñ]+(\\s(de|la|los|las|del|y|d'|D')?\\s?[A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$");
+    return regex_match(nombre, patron);
+}
+bool bisiesto(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+bool validarFecha(int dia, int mes, int anio) {
+    if (anio < 1910 || anio > 2025) { 
+        cout << "Error: Anio fuera de rango." << endl;
+        return false;
+    }
+    if (mes < 1 || mes > 12) {
+        cout << "Error: Mes fuera de rango." << endl;
+        return false;
+    }
+    if (dia < 1 || dia > 31 ) {
+        cout << "Error: Dia fuera de rango." << endl;
+        return false;
+    }
+    if (mes == 2) {
+        if (bisiesto(anio)){
+            if (dia > 29) {
+                cout << "Error: Febrero tiene 29 dias en un anio bisiesto." << std::endl;
+                return false;
+            }
+        } else {
+            if (dia > 28) {
+                cout << "Error: Febrero tiene 28 dias en un anio no bisiesto." << std::endl;
+                return false;
+            }
+        }
+    }
+    else if (mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes == 8 || mes == 10 || mes == 12) {
+        if (dia > 31) {
+            cout << "Error: El mes tiene 31 dias." << endl;
+            return false;
+        }
+    }
+    else if (mes == 4 || mes == 6 || mes == 9 || mes == 11) {
+        if (dia > 30) {
+            cout << "Error: El mes tiene 30 dias." << endl;
+            return false;
+        }
+    }
+    return true;
+}
+// Función que obtiene la fecha actual y la guarda en la estructura
+void obtenerFechaActual(paciente &p) {
+    auto ahora = chrono::system_clock::now();
+    time_t tiempo_actual = chrono::system_clock::to_time_t(ahora);
+    tm* fecha_local = localtime(&tiempo_actual);
+    
+    p.dia1 = fecha_local->tm_mday;
+    p.mes1 = fecha_local->tm_mon + 1;  // Ajuste porque meses van de 0-11
+    p.anio1 = fecha_local->tm_year + 1900;  // Ajuste porque cuenta desde 1900
+}
+void registrarPaciente(paciente &nuevoPaciente) {
+    obtenerFechaActual(nuevoPaciente);
+    bool fechaValida = false;
+    do {
+        cout << "Nombre del paciente: ";
+        getline(cin, nuevoPaciente.nombre);
+        if(!validarNombre(nuevoPaciente.nombre)) {
+            cout << "Error: Solo se permiten letras y espacios.\n";
+        }
+    } while(!validarNombre(nuevoPaciente.nombre));
+    do {
+        cout << "Apellido del paciente: ";
+        getline(cin, nuevoPaciente.apellido);
+        if(!validarNombre(nuevoPaciente.apellido)) {
+            cout << "Error: Solo se permiten letras y espacios.\n";
+        }
+    } while(!validarNombre(nuevoPaciente.apellido));
+    do {
+        cout << "Ingrese la fecha de nacimiento del paciente (dd mm aaaa): " << endl;
+        cout << "Dia: ";
+        cin >> nuevoPaciente.dia2;
+        cout << "Mes: ";
+        cin >> nuevoPaciente.mes2;
+        cout << "Anio: ";
+        cin >> nuevoPaciente.anio2;
+        
+        fechaValida = validarFecha(nuevoPaciente.dia2, nuevoPaciente.mes2, nuevoPaciente.anio2);
+        if (!fechaValida) {
+            cout << "Por favor, ingrese una fecha valida." << endl;
+        }
+    } while (!fechaValida);
+    
+    // Validación de sexo
+    do {
         cout << "Ingresa el sexo del paciente (M/F): ";
         cin >> nuevoPaciente.sexo;
+        if (nuevoPaciente.sexo != 'M' && nuevoPaciente.sexo != 'F') {
+            cout << "Error: Ingrese solo M o F." << endl;
+        }
     } while (nuevoPaciente.sexo != 'M' && nuevoPaciente.sexo != 'F');
 
     cout << "Paciente registrado con exito!" << endl;
@@ -170,46 +243,67 @@ bool archivoExistente(const paciente &p)
     return archivo.good();
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void busquedaFecha(const paciente &p, const registro &r)
-{
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+void busquedaFecha(const paciente &p, const registro &r) {
     int dia, mes, anio;
-    cout << "Ingrese la feccha que desea buscar: " << endl;
-    cout << "Dia: ";
-    cin >> dia;
-    cout << "Mes: ";
-    cin >> mes;
-    cout << "Anio: ";
-    cin >> anio;
+    bool fechaValida = false;
+    
+    // Validación de fecha
+    do {
+        cout << "Ingrese la fecha que desea buscar: " << endl;
+        cout << "Dia: ";
+        cin >> dia;
+        cout << "Mes: ";
+        cin >> mes;
+        cout << "Anio: ";
+        cin >> anio;
+        
+        fechaValida = validarFecha(dia, mes, anio);
+        if (!fechaValida) {
+            cout << "Fecha inválida. Por favor ingrese una fecha válida." << endl;
+            // Limpiar el buffer de entrada en caso de error
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        }
+    } while (!fechaValida);
+
     string fechaBusqueda = to_string(dia) + "/" + to_string(mes) + "/" + to_string(anio);
     cout << "Buscando citas para la fecha: " << fechaBusqueda << endl;
+    
     ifstream archivo(nombreArchivo(p));
     bool encontrado = false;
-    if (!archivo)
-    {
+    
+    if (!archivo) {
         cout << "Error al abrir el archivo." << endl;
         return;
     }
-    else
-    {
+    else {
         string linea;
-        while (getline(archivo, linea))
-        {
-            if (linea.find(fechaBusqueda) != string::npos){
+        while (getline(archivo, linea)) {
+            if (linea.find(fechaBusqueda) != string::npos) {
                 encontrado = true;
                 cout << linea << endl;
-                while(getline(archivo, linea) && linea != "_________________________________________"){
+                while(getline(archivo, linea) && linea != "_________________________________________") {
                     cout << linea << endl;
                 }
-                cout <<  "_________________________________________" << endl;
+                cout << "_________________________________________" << endl;
             }
         }
-        if(!encontrado){
+        if(!encontrado) {
             cout << "No se encontraron registros para esta fecha." << endl;
         }
+        archivo.close();
     }
-    archivo.close();
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
+void busquedaEspecialidad(const paciente &pac)
+{
+    string especialidad;
+    string nombreArc = nombreArchivo(pac) + ".txt";
+    ifstream archivo(nombreArc);
+}
+///////////////////////////////////////////////////////////////////////////////////////////////////
 int seleccionarEspecialidad()
 {
     int opcion;
@@ -224,65 +318,59 @@ int seleccionarEspecialidad()
     } while (opcion < 1 || opcion > 10);
     return opcion;
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-void busquedaEspecialidad(paciente pac, registro reg)
-{
-    int opcion = seleccionarEspecialidad();
-    string espeselec= especialidadLista[opcion - 1];
-    cout << "Buscando citas para la especialidad: " << espeselec << endl;
-    ifstream archivo(nombreArchivo(pac));
-    bool encontrado = false;
-    if(!archivo){
-        cout << "Error al abrir el arcivo."<< endl;
-        return;
-    } else {
-        string linea;
-        while(getline(archivo, linea)){
-            if(linea.find(espeselec) != string::npos){
-                encontrado  = true;
-                cout << linea << endl;
-                while(getline(archivo, linea) && linea != "_________________________________________"){
-                    cout << linea << endl;
-                }
-                cout << "_________________________________________" << endl; 
-            }
-        }
-        if(!encontrado){
-            cout << "No se encontraron registros para esta espeialidad con este paciente." << endl;
-        }
-    }
-    archivo.close();
-}  
-///////////////////////////////////////////////////////////////////////////////////////////////////
-void registroInfo(paciente &pac, registro &reg)
-{
-    if (!archivoExistente(pac))
-    {
+void obtenerFechaActual(registro &reg) {
+    auto ahora = chrono::system_clock::now();
+    time_t tiempo_actual = chrono::system_clock::to_time_t(ahora);
+    tm* fecha_local = localtime(&tiempo_actual);
+
+    reg.dia = fecha_local->tm_mday;
+    reg.mes = fecha_local->tm_mon + 1;
+    reg.anio = fecha_local->tm_year + 1900;
+}
+void registroInfo(paciente &pac, registro &reg) {
+    if (!archivoExistente(pac)) {
         cout << "No se encontro ningun registro con esta cedula." << endl;
+        return;
     }
-    else
-    {
-        cout << "Registro encontrado." << endl;
-        cout << "Ingrese la fecha de la consulta: " << endl;
-        cout << "Dia: ";
-        cin >> reg.dia;
-        cout << "Mes: ";
-        cin >> reg.mes;
-        cout << "Anio: ";
-        cin >> reg.anio;
-        cout << "Ingrese la especialidad de la cita: ";
-        reg.especialidad = especialidadLista[seleccionarEspecialidad() - 1];
+
+    cout << "Registro encontrado." << endl;
+    
+    // Asignación automática de fecha
+    obtenerFechaActual(reg);
+    cout << "Fecha de consulta asignada automaticamente: " 
+         << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
+
+    // Selección de especialidad
+    cout << "Seleccione la especialidad de la cita: ";
+    reg.especialidad = especialidadLista[seleccionarEspecialidad() - 1];
+    
+    // Validación del nombre del doctor
+    bool nombreValido = false;
+    do {
         cin.ignore();
-        cout << "Ingrese el nombre del doctor a cargo de la cita: ";
+        cout << "Ingrese el nombre del doctor a cargo: ";
         getline(cin, reg.doctor);
-        ofstream archivo(nombreArchivo(pac), ios::app);
-        archivo << "_________________________________________" << endl;
-        archivo << "Fecha de cita: " << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
-        archivo << "Especialidad: " << reg.especialidad << endl;
-        archivo << "Doctor: " << reg.doctor << endl;
-        archivo.close();
-        cout << "Informacion registrada exitosamente." << endl;
+        
+        nombreValido = validarNombre(reg.doctor);
+        if (!nombreValido) {
+            cout << "Nombre invalido. Solo se permiten letras." << endl;
+        }
+    } while (!nombreValido);
+
+    // Escritura en archivo
+    ofstream archivo(nombreArchivo(pac), ios::app);
+    if (!archivo) {
+        cout << "Error al abrir el archivo para registro." << endl;
+        return;
     }
+
+    archivo << "_________________________________________" << endl
+            << "Fecha de cita: " << reg.dia << "/" << reg.mes << "/" << reg.anio << endl
+            << "Especialidad: " << reg.especialidad << endl
+            << "Doctor: " << reg.doctor << endl;
+    
+    cout << "Información registrada exitosamente el " 
+         << reg.dia << "/" << reg.mes << "/" << reg.anio << endl;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 void imprimirArchivo(paciente &p)
@@ -360,7 +448,7 @@ int main()
                     busquedaFecha(pac, reg);
                     break;
                 case 2:
-                    busquedaEspecialidad(pac, reg);
+                    seleccionarEspecialidad();
                     break;
                 }
             }
