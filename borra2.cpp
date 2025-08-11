@@ -347,3 +347,5 @@ int main()
     } while (op != 5);
     return 0;
 }
+string especialidadLista[10] = 
+    {"Cardiología","Endocrinología","Ginecología","Medicina Familiar",     "Medicina General","Neurología","Nutrición","Pediatría","Traumatología""Urología"};

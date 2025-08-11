@@ -21,9 +21,7 @@ struct registro
     string doctor;
     int dia, mes, anio;
 };
-string especialidadLista[10] = {"Cardiologia", "Traumatologia", "Neurologia", "Medicina familiar",
-                                "Endocrinologia", "Medicina General", "Urologia", "Nutricion",
-                                "Ginecologia", "Pediatria"};
+string especialidadLista[10] = {"Cardiología","Endocrinología","Ginecología","Medicina Familiar","Medicina General","Neurología","Nutrición","Pediatría","Traumatología","Urología"};
 string nombreArchivo(const paciente &p) // sub - funcion especifica para nombrar un archivo con la cedula
 {
     string nombreArc = p.cedula + ".txt";
@@ -210,17 +208,10 @@ void busquedaFecha(paciente p, registro r)
         if(!encontrado){
             cout << "No se encontraron registros para esta fecha." << endl;
         }
-        archivo.close();
     }
+    archivo.close();
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
-void busquedaEspecialidad(paciente pac)
-{
-    string especialidad;
-    string nombreArc = nombreArchivo(pac) + ".txt";
-    ifstream archivo(nombreArc);
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////
 int seleccionarEspecialidad()
 {
     int opcion;
@@ -236,6 +227,35 @@ int seleccionarEspecialidad()
     return opcion;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
+void busquedaEspecialidad(paciente pac, registro reg)
+{
+    int opcion = seleccionarEspecialidad();
+    string espeselec= especialidadLista[opcion - 1];
+    cout << "Buscando citas para la especialidad: " << espeselec << endl;
+    ifstream archivo(nombreArchivo(pac));
+    bool encontrado = false;
+    if(!archivo){
+        cout << "Error al abrir el arcivo."<< endl;
+        return;
+    } else {
+        string linea;
+        while(getline(archivo, linea)){
+            if(linea.find(espeselec) != string::npos){
+                encontrado  = true;
+                cout << linea << endl;
+                while(getline(archivo, linea) && linea != "_________________________________________"){
+                    cout << linea << endl;
+                }
+                cout << "_________________________________________" << endl; 
+            }
+        }
+        if(!encontrado){
+            cout << "No se encontraron registros para esta espeialidad con este paciente." << endl;
+        }
+    }
+    archivo.close();
+}   
+///////////////////////////////////////////////////////////////////////////////////////////////////
 void registroInfo(paciente &pac, registro &reg)
 {
     if (!archivoExistente(pac))
@@ -342,7 +362,7 @@ int main()
                     busquedaFecha(pac, reg);
                     break;
                 case 2:
-                    seleccionarEspecialidad();
+                    busquedaEspecialidad(pac, reg);
                     break;
                 }
             }
